@@ -84,10 +84,10 @@
         }
 
         /* ── Sound Buttons ──────────────────────────────────────────────── */
-        .sound-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2,1fr); 
-            gap: 0.5rem; 
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap: 0.5rem;
         }
         .sound-btn {
             padding: 0.5rem;
@@ -241,6 +241,8 @@
         }
         .circle-btn:hover { border-color: var(--ink); color: var(--ink); background: var(--paper-dark); }
         .circle-btn.active { background: var(--blue); color: var(--paper); border-color: var(--blue); }
+        .step-btn.active { background: var(--amber); color: var(--paper); border-color: var(--amber); }
+        .resolve-btn.active { background: var(--green); color: var(--paper); border-color: var(--green); }
         .root-grid.disabled { opacity: 0.4; pointer-events: none; }
         .root-all-row.disabled { opacity: 0.4; pointer-events: none; }
 
@@ -281,10 +283,21 @@
             border-color: var(--ink); 
             background: var(--paper-dark); 
         }
-        .show-btn.active { 
-            background: rgba(200,132,26,0.08); 
-            border-color: var(--amber); 
-            color: var(--amber); 
+        .show-btn.active {
+            background: rgba(200,132,26,0.08);
+            border-color: var(--amber);
+            color: var(--amber);
+        }
+        .reveal-mode-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
+            gap: 0.5rem;
+        }
+        .reveal-mode-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+            font-weight: 700;
         }
 
         /* ── Chord Display ──────────────────────────────────────────────── */
@@ -306,20 +319,35 @@
             color: var(--ink);
             margin-bottom: 0.4rem;
         }
-        .chord-symbol.hidden { 
-            color: var(--border); 
-            font-size: 2rem; 
+        .chord-symbol.hidden {
+            color: var(--border);
+            font-size: 2rem;
+        }
+        .chord-display.peekable {
+            cursor: pointer;
+            border-color: var(--amber);
+        }
+        .chord-display.peekable:hover {
+            background: rgba(196,83,28,0.04);
         }
         .chord-notes { 
             font-size: 0.75rem; 
             color: var(--ink-muted); 
             letter-spacing: 0.06em; 
         }
-        .drone-status { 
-            text-align: center; 
-            font-size: 0.72rem; 
-            color: var(--ink-muted); 
-            font-style: italic; 
+        .drone-status {
+            text-align: center;
+            font-size: 0.72rem;
+            color: var(--ink-muted);
+            font-style: italic;
+        }
+        .drone-preview {
+            text-align: center;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--amber);
+            margin-top: 0.5rem;
         }
 
         /* ── Progress Bar ───────────────────────────────────────────────── */
@@ -403,32 +431,171 @@
             cursor: default;
         }
 
-        /* ── Chord History List ─────────────────────────────────────────── */
-        .history-list {
-            max-height: 140px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column-reverse;
-            gap: 0.3rem;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border) transparent;
+        /* ── Practice Ideas ─────────────────────────────────────────────── */
+        .practice-ideas-card details { counter-reset: idea; } /* one counter for all 110, not per category */
+        .practice-ideas-card summary {
+            cursor: pointer;
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.01em;
+            list-style: none;
         }
-        .history-item {
+        .practice-ideas-card summary::-webkit-details-marker { display: none; }
+        .practice-ideas-card summary::before { content: '▸  '; color: var(--amber); }
+        .practice-ideas-card details[open] summary::before { content: '▾  '; }
+        .practice-ideas-intro {
+            margin: 0.7rem 0 1rem;
+            font-size: 0.85rem;
+            color: var(--ink-light);
+            line-height: 1.55;
+        }
+        .practice-ideas-legend {
             display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            padding: 0.25rem 0.5rem;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.72rem;
+            color: var(--ink-muted);
+        }
+        .practice-ideas-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1rem;
+        }
+        .practice-ideas-filter-btn {
+            padding: 0.35rem 0.7rem;
+            background: none;
+            border: 1px solid var(--border);
             border-radius: 0;
+            font-family: var(--font-body);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--ink-light);
+            cursor: pointer;
+        }
+        .practice-ideas-filter-btn:hover { border-color: var(--ink); }
+        .practice-ideas-filter-btn.active {
+            background: var(--ink);
+            color: var(--paper);
+            border-color: var(--ink);
+        }
+        .practice-ideas-catnav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 0.9rem;
+            margin-bottom: 1.4rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .practice-ideas-catnav a {
+            font-size: 0.75rem;
+            color: var(--amber);
+            text-decoration: none;
+            border-bottom: 1px dotted var(--amber);
+        }
+        .practice-ideas-catnav a:hover { color: var(--ink); border-color: var(--ink); }
+        .practice-ideas-category { margin-bottom: 1.8rem; scroll-margin-top: 1rem; }
+        .practice-ideas-category:last-child { margin-bottom: 0; }
+        .practice-ideas-category > label.section-label { margin-bottom: 0.3rem; }
+        .practice-ideas-category-desc {
             font-size: 0.78rem;
-            background: var(--paper-dark);
-            border: 1px solid transparent;
+            color: var(--ink-muted);
+            margin-bottom: 0.4rem;
+            font-style: italic;
         }
-        .history-item.current {
-            border-color: var(--amber);
-            background: rgba(200,132,26,0.07);
+        .level-meter {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 2px;
+            margin-left: 0.55rem;
+            vertical-align: middle;
         }
-        .history-item .h-sym { font-family: var(--font-display); font-weight: 700; color: var(--ink); }
-        .history-item .h-num { font-size: 0.65rem; color: var(--ink-muted); }
+        .level-meter i {
+            display: block;
+            width: 3px;
+            background: var(--border);
+        }
+        .level-meter i:nth-child(1) { height: 6px; }
+        .level-meter i:nth-child(2) { height: 9px; }
+        .level-meter i:nth-child(3) { height: 12px; }
+        .level-meter i:nth-child(4) { height: 15px; }
+        .level-meter i:nth-child(5) { height: 18px; }
+        .level-meter i.filled { background: var(--amber); }
+        .level-meter.legend-sample i { background: var(--border); }
+        .level-meter.legend-sample i.filled { background: var(--amber); }
+        .practice-ideas-list { list-style: none; }
+        .practice-ideas-list li {
+            counter-increment: idea;
+            display: flex;
+            gap: 0.9rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .practice-ideas-list li:last-child { border-bottom: none; padding-bottom: 0; }
+        .practice-ideas-list li::before {
+            content: counter(idea, decimal-leading-zero);
+            flex: 0 0 auto;
+            min-width: 2.6rem;
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 900;
+            line-height: 1.3;
+            color: var(--amber);
+        }
+        .practice-idea-title {
+            font-weight: 700;
+            font-size: 0.92rem;
+            margin-bottom: 0.2rem;
+        }
+        .practice-idea-desc {
+            font-size: 0.83rem;
+            color: var(--ink-light);
+            line-height: 1.5;
+        }
+        .practice-ideas-list li.is-clickable {
+            cursor: pointer;
+            transition: background 0.12s;
+            margin: 0 -0.6rem;
+            padding-left: 0.6rem;
+            padding-right: 0.6rem;
+        }
+        .practice-ideas-list li.is-clickable:hover {
+            background: rgba(196,83,28,0.06);
+        }
+        .apply-hint {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            color: var(--amber);
+            white-space: nowrap;
+            margin-left: 0.6rem;
+        }
+        .preset-toast {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translateX(-50%) translateY(16px);
+            background: var(--ink);
+            color: var(--paper);
+            padding: 0.7rem 1.3rem;
+            font-family: var(--font-body);
+            font-size: 0.82rem;
+            font-weight: 600;
+            border: 1px solid var(--amber);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+            z-index: 50;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .preset-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
 
     </style>
 </head>
@@ -448,6 +615,7 @@
                 <button class="sound-btn" data-sound="warm">Warm</button>
                 <button class="sound-btn" data-sound="shimmer">Shimmer</button>
                 <button class="sound-btn" data-sound="pad">Pad</button>
+                <button class="sound-btn" data-sound="keys">Keys</button>
             </div>
         </div>
         <div class="control-group">
@@ -507,6 +675,14 @@
             <div class="circle-row">
                 <button class="circle-btn" id="circFifthsBtn">Circle of Fifths</button>
                 <button class="circle-btn" id="circFourthsBtn">Circle of Fourths</button>
+            </div>
+            <div class="circle-row" style="margin-top:0.4rem;">
+                <button class="circle-btn step-btn" id="stepUpBtn">&#9650; Step Up Selected</button>
+                <button class="circle-btn step-btn" id="stepDownBtn">&#9660; Step Down Selected</button>
+            </div>
+            <div class="circle-row" style="margin-top:0.4rem;">
+                <button class="circle-btn resolve-btn" id="resolveMajorBtn">Resolve Dominants &#8594; Major</button>
+                <button class="circle-btn resolve-btn" id="resolveMinorBtn">Resolve Dominants &#8594; Minor</button>
             </div>
         </div>
         <div style="font-size:0.68rem;color:var(--ink-muted);font-style:italic;margin:0 0 0.9rem;">Check as many boxes as you like across Triad, Seventh/Sixth, and Tensions below — each one adds to the pool of chord qualities that can come up (root still comes from the Roots section above). Check just one triad and one seventh and it'll always play that same quality; check more and it'll vary each time.</div>
@@ -579,6 +755,10 @@
                 <input type="checkbox" id="inversionCheck" style="accent-color:var(--amber);cursor:pointer">
                 <span style="font-size:0.78rem;color:var(--ink-muted)">Allow inversions and slash chords</span>
             </label>
+            <label class="check-label" style="margin-top:0.4rem;">
+                <input type="checkbox" id="inversionOnlyCheck" style="accent-color:var(--amber);cursor:pointer">
+                <span style="font-size:0.78rem;color:var(--ink-muted)">Only inversions and slash chords — practice that sound specifically</span>
+            </label>
         </div>
         <div style="height:1rem"></div>
         <button class="drone-btn" id="droneStartBtn">Start</button>
@@ -587,11 +767,19 @@
             <button class="pause-btn" id="droneBackBtn" disabled style="margin-bottom:0;flex:1">← Back</button>
             <button class="pause-btn" id="droneNextBtn" disabled style="margin-bottom:0;flex:1">Next →</button>
         </div>
-        <button class="show-btn" id="droneShowBtn">Show Chords</button>
+        <label class="section-label">Reveal</label>
+        <div class="reveal-mode-grid" id="droneRevealGrid">
+            <button class="sound-btn reveal-mode-btn active" data-mode="peek">Peek</button>
+            <button class="sound-btn reveal-mode-btn" data-mode="always">Always Show</button>
+        </div>
+        <label class="check-label" style="margin-top:0.6rem;">
+            <input type="checkbox" id="previewNextCheck" style="accent-color:var(--amber);cursor:pointer">
+            <span style="font-size:0.78rem;color:var(--ink-muted)">Preview next chord</span>
+        </label>
     </div>
 
     <div class="card">
-        <div class="chord-display">
+        <div class="chord-display" id="droneChordDisplay">
             <div class="chord-symbol hidden" id="droneSymbol">—</div>
             <div class="chord-notes" id="droneNotes"></div>
         </div>
@@ -599,11 +787,482 @@
             <div class="progress-bar" id="droneProgressBar"></div>
         </div>
         <div class="drone-status" id="droneStatus">Click Start</div>
+        <div class="drone-preview" id="dronePreview" hidden></div>
     </div>
 
-    <div class="card" id="droneHistoryCard" style="display:none">
-        <label class="section-label">History</label>
-        <div class="history-list" id="droneHistoryList"></div>
+    <div class="card practice-ideas-card">
+        <details>
+            <summary>Ways to practice with this (95)</summary>
+            <p class="practice-ideas-intro">95 ways to use the drone, grouped by what you're actually training. Click any of them to load its exact setup below — roots, qualities, tensions, timing, all of it.</p>
+            <div class="practice-ideas-legend">Difficulty: <span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span> more bars filled = harder, up to 5</div>
+            <div class="practice-ideas-filters">
+                <button class="practice-ideas-filter-btn active" data-level="all">All</button>
+                <button class="practice-ideas-filter-btn" data-level="beginner">Beginner</button>
+                <button class="practice-ideas-filter-btn" data-level="intermediate">Intermediate</button>
+                <button class="practice-ideas-filter-btn" data-level="advanced">Advanced</button>
+            </div>
+            <nav class="practice-ideas-catnav" aria-label="Jump to category">
+                <a href="#pi-quality">Chord Quality</a>
+                <a href="#pi-root">Root &amp; Bass</a>
+                <a href="#pi-cycles">Functional Harmony &amp; Cycles</a>
+                <a href="#pi-comping">Comping &amp; Voicings</a>
+                <a href="#pi-improv">Improvisation &amp; Soloing</a>
+                <a href="#pi-technique">Technique &amp; Shedding</a>
+                <a href="#pi-rhythm">Time, Rhythm &amp; Tempo</a>
+                <a href="#pi-altered">Extended &amp; Altered Vocabulary</a>
+                <a href="#pi-reflex">Reflex &amp; Real-Time Reaction</a>
+                <a href="#pi-composition">Composition, Transcription &amp; Creative Use</a>
+                <a href="#pi-ensemble">Duo / Ensemble Simulation</a>
+            </nav>
+            <div class="practice-ideas-category" id="pi-quality">
+                <label class="section-label">Ear Training — Chord Quality</label>
+                <p class="practice-ideas-category-desc">Learning to name what you hear before you see it.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="Major vs. minor" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Major vs. minor<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Check only Major and Minor under Triad, name which one before revealing.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Add diminished and augmented" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Add diminished and augmented<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">All four Triad qualities on — name the quality by ear each time.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Triad vs. seventh" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Triad vs. seventh<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Compare "None (bare triad)" against Major 7th on the same quality; hear exactly what the 7th adds.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Major 7 vs. dominant 7" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Major 7 vs. dominant 7<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">The two "consonant-ish" sevenths that trip people up most — isolate just these two.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Diminished vs. augmented" data-preset="{&quot;shapes&quot;:[&quot;diminished&quot;,&quot;augmented&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Diminished vs. augmented<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Both have a tense, unresolved quality that's easy to mix up on their own — compare them side by side instead of isolating just one.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Sixth vs. minor&#x27;s dominant 7th" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;],&quot;sevenths&quot;:[&quot;six&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Sixth vs. minor's dominant 7th<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">6th and a minor triad's dom7 sound deceptively close — isolate and compare them back to back.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Sus chords, no tensions" data-preset="{&quot;shapes&quot;:[&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Sus chords, no tensions<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Sus2 and Sus4 only. Learn to hear "no third" before adding anything on top of it.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Every seventh quality at once" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Every seventh quality at once<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">All five Seventh/Sixth boxes on, one triad quality — name the seventh type on the fly.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Full quality gauntlet" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Full quality gauntlet<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Every Triad and every Seventh/Sixth box on, nothing else — call the full quality (not the root) before revealing.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Call the intervals, not the notes" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Call the intervals, not the notes<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">After naming the quality by ear, spell it as root-3rd-5th(-7th) intervals before you check — that's the learnable version of "spelling" a chord, no perfect pitch required.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-root">
+                <label class="section-label">Ear Training — Root &amp; Bass</label>
+                <p class="practice-ideas-category-desc">Pitch recognition, not just color recognition.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="advanced" data-level="4" data-title="Name the root" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Name the root<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Peek the first chord to set a reference pitch, then judge each new root relative to that anchor before checking — reference-based guessing, not absolute pitch.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Root motion by interval" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;,&quot;Db&quot;,&quot;E&quot;,&quot;G&quot;],&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Root motion by interval<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Four roots spanning uneven distances (C, Db, E, G) — name the actual size and direction of the jump each time, not a coin flip between two known options. Add more roots to the pool for a harder version once this feels easy.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Inversions, spotted" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:true,&quot;inversionsOnly&quot;:true,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Inversions, spotted<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Turn on "Allow inversions and slash chords" and identify root position vs. inverted before revealing.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Bass note vs. chord tone" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:true,&quot;inversionsOnly&quot;:true,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Bass note vs. chord tone<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">With slash chords on, sing the bass note separately from the quality sitting above it, then check whether it was an inverted chord tone or a true slash bass — you're isolating register and relationship, not naming absolute pitches.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Slash-chord spelling" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:true,&quot;inversionsOnly&quot;:true,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Slash-chord spelling<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Figure out which chord tone is in the bass — 3rd? 5th? 7th? — before Show Chords confirms it.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Freeze and sing the root" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Freeze and sing the root<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Hit Freeze mid-drone, sing the root from memory, then Show Chords to check yourself.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Freeze and sing the chord" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Freeze and sing the chord<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Same idea, but sing root–3rd–5th(–7th) as an arpeggio before checking.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Back-and-forth interval drill" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;none&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;,&quot;G&quot;],&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Back-and-forth interval drill<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Use ← Back / Next → to bounce between two roots repeatedly until that interval is automatic both directions.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-cycles">
+                <label class="section-label">Functional Harmony &amp; Cycles</label>
+                <p class="practice-ideas-category-desc">How chords actually move in real tunes.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="intermediate" data-level="3" data-title="ii-V motion, roughly" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;,&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fifths&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">ii-V motion, roughly<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Check Minor and Dominant, Circle of Fifths — you'll get a real mix of ii-type and V-type qualities moving by fifths, though it won't strictly alternate ii-V-ii-V the way an actual progression would.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Full cycle of fifths" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fifths&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Full cycle of fifths<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Let a whole 12-root cycle run uninterrupted. Worth naming honestly: with one quality checked, this is a transposition drill — the same shape moved everywhere — not functional harmony, since nothing about the quality itself ever changes.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Cycle of fourths" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fourths&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Cycle of fourths<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Same transposition drill on Circle of Fourths — fourths is the direction real tunes actually resolve in, but one static quality moving through it still isn't functional harmony on its own.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Static root, changing quality" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:12,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Static root, changing quality<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One root, multiple qualities checked — hear color change with the key center held still.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Two-root key-center drill" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;,&quot;G&quot;],&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Two-root key-center drill<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Clear down to two roots a 5th apart, one quality, and treat it like a I–V pair to internalize.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Chromatic root motion" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;stepMode&quot;:&quot;up&quot;,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Chromatic root motion<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">All 12 roots, Step Up Selected — a genuine chromatic run through every half-step, not two roots ping-ponging. Try Step Down too, or narrow the roots for a shorter run.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Whole-tone root motion" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;stepMode&quot;:&quot;up&quot;,&quot;roots&quot;:[&quot;C&quot;,&quot;D&quot;,&quot;E&quot;,&quot;Gb&quot;,&quot;Ab&quot;,&quot;Bb&quot;],&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Whole-tone root motion<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">The six-note whole-tone set (C, D, E, Gb, Ab, Bb), Step Up Selected — a real ascending whole-tone run, a less common motion that's still worth owning.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Cycle plus a tension" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;9&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fifths&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Cycle plus a tension<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Circle of Fifths with one tension always on — hear how the same color feels as the function keeps changing.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Fifths vs. fourths, compared" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fifths&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Fifths vs. fourths, compared<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Run the same quality through both cycles back to back — it's the same set of roots, felt in opposite directions.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-comping">
+                <label class="section-label">Comping &amp; Voicings</label>
+                <p class="practice-ideas-category-desc">Using the drone as a practice rhythm section.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="Comp one static quality" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;metro&quot;:{&quot;bpm&quot;:90,&quot;bars&quot;:8},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Comp one static quality<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One root, one quality, Metronome mode — comp rhythm patterns against a real pulse with zero harmonic changes to track.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Comp changing roots, same quality" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Comp changing roots, same quality<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">ALL roots, one quality — focus entirely on voice-leading between changes.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Comp changing qualities, same root" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Comp changing qualities, same root<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One root, multiple qualities — isolate how a voicing's shape changes under a fixed root.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Metronome-locked comping" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:2},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Metronome-locked comping<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Duration Mode: Metronome, pick a Bars count, and comp in strict time instead of an arbitrary timer.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Slash-chord comping" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:true,&quot;inversionsOnly&quot;:true,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Slash-chord comping<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Only inversions and slash chords on — voice the correct bass note under every single comp, not just the upper structure.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Determine the chord quality" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Determine the chord quality<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Use your instrument to help you work it out — play notes, test intervals against what you hear, whatever gets you there — before checking against the reveal.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Comping with restraint" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:90,&quot;bars&quot;:8},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Comping with restraint<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Comp as if there's a singer or horn player who needs room — play less than feels natural, and notice how little harmonic information you actually need to state.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Rootless voicings" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[&quot;9&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Rootless voicings<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">For every chord, deliberately leave the root out of your voicing since the drone already states it.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="One voicing, every root" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">One voicing, every root<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Pick a single voicing shape and see how far around the cycle you can carry it before it stops working.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-improv">
+                <label class="section-label">Improvisation &amp; Soloing</label>
+                <p class="practice-ideas-category-desc">Melodic practice with a moving (or static) target.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="One chord, one scale" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">One chord, one scale<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Static vamp, matching scale only, nothing chromatic — until it's fluent.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="One chord, arpeggios only" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;G&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">One chord, arpeggios only<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Same static setup, restricted to arpeggiating the chord tones.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Target the 3rd and 7th" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;,&quot;previewNext&quot;:true}"><div>
+                        <div class="practice-idea-title">Target the 3rd and 7th<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Turns on the Next-chord preview — check it as each chord starts, work out its 3rd and 7th, then land your first note there right as the next change hits.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Motif development" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Motif development<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Play a 3–4 note idea, then let it evolve as the chord changes underneath it.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Call and response with yourself" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Call and response with yourself<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Play a phrase, leave space, answer it as the next chord arrives.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Enclosures" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;always&quot;,&quot;previewNext&quot;:true}"><div>
+                        <div class="practice-idea-title">Enclosures<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Next-chord preview on — approach the upcoming target note by half-step above and below, landing on it right as the chord actually changes.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Outside and back" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;Bb&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Outside and back<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Over a locked static chord, deliberately play a half-step outside and resolve back in.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Rhythmic displacement" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:110,&quot;bars&quot;:2},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Rhythmic displacement<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Play the exact same lick, but start it on a different beat every time the chord changes.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Space and silence" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:20,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Space and silence<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Solo with more rests than notes — let the chord changes do some of the work for you.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-technique">
+                <label class="section-label">Technique &amp; Shedding</label>
+                <p class="practice-ideas-category-desc">Drill mechanics over a held chord, so the pattern stays tied to real harmony instead of abstract finger motion. These are self-paced — clicking one Starts the drone already frozen on a chord; move it with Next → when you're ready.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="Scale patterns, static chord" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:60,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Scale patterns, static chord<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Thirds, fourths, whatever pattern you're drilling — the held chord keeps every note honest about whether it's a chord tone or a tension.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Arpeggio speed builds" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;F&quot;],&quot;duration&quot;:60,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Arpeggio speed builds<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One held chord — gradually raise your own tempo running the arpeggio until it's clean at speed.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Position shifting" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;A&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Position shifting<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Play the held chord's scale or arpeggio in every position on the neck, then move the chord and do it again.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="String-skipping patterns" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;D&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">String-skipping patterns<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Drill string-skipping over a held chord — the harmony underneath keeps the pattern musical instead of a blind finger exercise.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Alternate picking to the click" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;G&quot;],&quot;metro&quot;:{&quot;bpm&quot;:160,&quot;bars&quot;:8},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Alternate picking to the click<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Metronome mode at a fast tempo, held chord — drill clean alternate picking locked to the click.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Legato runs" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;E&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Legato runs<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Hammer-ons and pull-offs instead of picking — work a run over the held chord until it's even and smooth, then move on.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Sweep-picked arpeggios" data-preset="{&quot;shapes&quot;:[&quot;diminished&quot;],&quot;sevenths&quot;:[&quot;dim7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Sweep-picked arpeggios<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Held chord — drill a sweep shape that matches that exact quality until the pick hand tracks it cleanly.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Full-neck arpeggio mapping" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;Bb&quot;],&quot;duration&quot;:60,&quot;reveal&quot;:&quot;always&quot;,&quot;freeze&quot;:true}"><div>
+                        <div class="practice-idea-title">Full-neck arpeggio mapping<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One held chord — find and play every occurrence of the arpeggio across the whole fretboard before moving on.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Endurance shedding" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:60,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Endurance shedding<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">One chord, very long auto-advance — play continuously through fatigue the way you would in a real long solo section (don't freeze this one).</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-rhythm">
+                <label class="section-label">Time, Rhythm &amp; Tempo</label>
+                <p class="practice-ideas-category-desc">Using Duration Mode, BPM, and Bars on purpose.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="Metronome mode basics" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:4},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Metronome mode basics<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Switch Duration Mode to Metronome — feel changes land on the barline instead of a countdown.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Slow-tempo control" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:70,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Slow-tempo control<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Low BPM, long Bars count per chord — plenty of time to choose notes deliberately.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Fast-tempo reaction" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:180,&quot;bars&quot;:1},&quot;reveal&quot;:&quot;always&quot;,&quot;sound&quot;:&quot;keys&quot;}"><div>
+                        <div class="practice-idea-title">Fast-tempo reaction<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">High BPM, short Bars count, Keys sound so each chord lands the instant it changes — force quick harmonic reactions.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Odd bar groupings" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:3},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Odd bar groupings<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Set Bars to 3 or 5 instead of 4 — practice phrasing that doesn't fall into default 4-bar habits.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Tempo ramp" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:90,&quot;bars&quot;:4},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Tempo ramp<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Raise the BPM every few minutes on the same material, building real speed gradually.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Subdivided comping" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:110,&quot;bars&quot;:2},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Subdivided comping<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Metronome mode — comp one specific subdivision (straight 8ths, triplets) consistently through every change.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Anticipation practice" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:120,&quot;bars&quot;:2},&quot;reveal&quot;:&quot;always&quot;,&quot;previewNext&quot;:true}"><div>
+                        <div class="practice-idea-title">Anticipation practice<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Next-chord preview on — land the upcoming chord's target note a hair before the change actually lands, jazz-style anticipation.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Staying interesting on one chord" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:8},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Staying interesting on one chord<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">How long can you keep things interesting on just one chord?</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Polyrhythmic phrasing" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:8},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Polyrhythmic phrasing<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Over a static chord in Metronome mode, deliberately phrase in groups of 3 against the 4-feel click.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Just listen" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:40,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Just listen<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Play nothing — just listen and absorb the sound and feeling of the chord.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-altered">
+                <label class="section-label">Extended &amp; Altered Vocabulary</label>
+                <p class="practice-ideas-category-desc">Tensions and altered color, isolated and combined.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="beginner" data-level="1" data-title="One tension at a time" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b9&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">One tension at a time<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Check just b9 over a dominant chord, nothing else, and sit with that one color — sing the tension against the chord, find it on your instrument, learn its specific bite. Then swap it for natural 9, then #9, absorbing each on its own before you'd ever try to tell them apart by ear.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Natural vs. altered 9th" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Natural vs. altered 9th<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">A/B compare "9" against "b9" and "#9" back to back on the same chord.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Lydian vs. Ionian" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[&quot;#11&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Lydian vs. Ionian<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">The drone alternates maj7#11 and plain maj7. Play Lydian over the #11 chords — the raised 11 is a color tone you can sit on. Play Ionian over the plain maj7 chords, where the natural 11 is an avoid note: lean on it briefly to hear the clash, then resolve off it. Same chord family, two different jobs for the 11.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="b13 vs. natural 13" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">b13 vs. natural 13<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Same comparison, for the top tension this time.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Stacked altered tensions" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;#9&quot;,&quot;#11&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Stacked altered tensions<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">b9, #9, and #11 together over a dominant chord for a full "altered" sound.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Complex/unusual tensions on" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Complex/unusual tensions on<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Check "Include complex/unusual tensions" and let genuinely rare combinations surprise your ear.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Resolve the dominant" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;resolveMode&quot;:&quot;major&quot;,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Resolve the dominant<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Sets Resolve Dominants &#8594; Major, so the drone alternates a real dominant with its actual tonic. Sing or play where each dominant wants to go before it lands — try &#8594; Minor too.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Maj7#11 in isolation" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[&quot;#11&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Maj7#11 in isolation<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Major 7th plus #11 only — the classic "Lydian" comping color, drilled on its own.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Minor 9/11 in isolation" data-preset="{&quot;shapes&quot;:[&quot;minor&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;9&quot;,&quot;11&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Minor 9/11 in isolation<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Minor 7th with natural 9 and 11 — the Dorian-flavored minor sound, isolated from the rest.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Full altered-dominant vocabulary" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Full altered-dominant vocabulary<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Dominant quality, every tension box checked — comp or solo through the "everything's available" sound.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-reflex">
+                <label class="section-label">Reflex &amp; Real-Time Reaction</label>
+                <p class="practice-ideas-category-desc">For once the individual pieces above aren't the hard part.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="advanced" data-level="4" data-title="Everything on" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Everything on<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Every root, every quality, every tension — react to whatever comes with zero preparation.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Fast reflex, eyes closed" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Fast reflex, eyes closed<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Everything on, eyes closed — react purely by ear and feel.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Name it before you play it" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Name it before you play it<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Everything on — call out the quality out loud before your first note.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="One-note reaction" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">One-note reaction<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Everything on, but only one note allowed per chord: the first thing your ear finds.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="No repeats" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">No repeats<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Chaos setting, but you're not allowed to play the same lick twice across the whole session.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Quick-comp reflex" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:120,&quot;bars&quot;:1},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Quick-comp reflex<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Everything on — comp just one stab per chord, as fast and clean as you can.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Tempo-pushed chaos" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:160,&quot;bars&quot;:1},&quot;reveal&quot;:&quot;peek&quot;,&quot;sound&quot;:&quot;keys&quot;}"><div>
+                        <div class="practice-idea-title">Tempo-pushed chaos<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Chaos setting, fast Metronome tempo, Keys sound so nothing gets lost in a swell — the hardest combination the tool can produce.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Chaos with a fixed target tone" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Chaos with a fixed target tone<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Everything on, but you must always resolve to one chosen note (like the tonic) no matter what hits.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-composition">
+                <label class="section-label">Composition, Transcription &amp; Creative Use</label>
+                <p class="practice-ideas-category-desc">Treating the drone as a writing tool, not just a drill.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="intermediate" data-level="3" data-title="Steal a progression" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Steal a progression<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Freeze on a chord you like, note it down, and build the next few by ear like writing a tune.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Play as melodically as possible" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:20,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Play as melodically as possible<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Focus entirely on note selection over the changes — no runs, no licks, just the most singable line you can find.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Transcribe-style dictation" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[&quot;9&quot;],&quot;complexTensions&quot;:false,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;peek&quot;}"><div>
+                        <div class="practice-idea-title">Transcribe-style dictation<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Freeze a chord and work out its structure by ear — root, 3rd, 5th, 7th as intervals, not absolute note names — then confirm the actual spelling with Show Chords.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Slow-motion voicing study" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;],&quot;duration&quot;:45,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Slow-motion voicing study<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Long duration, one chord — try three totally different voicings for the same symbol and compare them.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Answering-machine game" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:12,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Answering-machine game<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Treat each new chord as a question a bandmate just asked, and answer it compositionally before it changes.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Two-chord vamp songwriting" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:[&quot;C&quot;,&quot;G&quot;],&quot;duration&quot;:30,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Two-chord vamp songwriting<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Clear roots down to two, one quality, and write a short original idea over just that loop.</div>
+                    </div></li>
+                </ol>
+            </div>
+            <div class="practice-ideas-category" id="pi-ensemble">
+                <label class="section-label">Duo / Ensemble Simulation</label>
+                <p class="practice-ideas-category-desc">Playing a role, not just playing notes.</p>
+                <ol class="practice-ideas-list">
+                    <li data-diff="intermediate" data-level="3" data-title="Trade fours" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:120,&quot;bars&quot;:4},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Trade fours<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Every chord change, alternate between comping for four "bars" and soloing for four.</div>
+                    </div></li>
+                    <li data-diff="intermediate" data-level="3" data-title="Rhythm-section lock" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:120,&quot;bars&quot;:4},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Rhythm-section lock<span class="level-meter" role="img" aria-label="Difficulty 3 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Metronome mode — comp exactly with the click, as if a drummer were depending on your time.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Vocalist simulation" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Vocalist simulation<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Sing a simple melody over the changing chords as if you were the singer, guitar silent.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Duo comping" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;,&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;metro&quot;:{&quot;bpm&quot;:100,&quot;bars&quot;:6},&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Duo comping<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Alternate chords between two different voicings or registers, as if trading comping duties with a second guitarist.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Feature-the-bass drill" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;dom7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:15,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Feature-the-bass drill<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Solo using only the lowest strings/frets available, simulating a bass feature.</div>
+                    </div></li>
+                    <li data-diff="beginner" data-level="1" data-title="Listening-only round" data-preset="{&quot;shapes&quot;:[&quot;major&quot;],&quot;sevenths&quot;:[&quot;maj7&quot;],&quot;tensions&quot;:[],&quot;complexTensions&quot;:false,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;circle&quot;:&quot;fifths&quot;,&quot;duration&quot;:8,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Listening-only round<span class="level-meter" role="img" aria-label="Difficulty 1 of 5"><i class="filled"></i><i></i><i></i><i></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Let a full cycle play through without playing anything — pure ear training for what a bandmate might do.</div>
+                    </div></li>
+                    <li data-diff="advanced" data-level="4" data-title="Live-arranging simulation" data-preset="{&quot;shapes&quot;:[&quot;major&quot;,&quot;minor&quot;,&quot;diminished&quot;,&quot;augmented&quot;,&quot;b5&quot;,&quot;sus2&quot;,&quot;sus4&quot;],&quot;sevenths&quot;:[&quot;none&quot;,&quot;six&quot;,&quot;maj7&quot;,&quot;dom7&quot;,&quot;dim7&quot;],&quot;tensions&quot;:[&quot;b9&quot;,&quot;9&quot;,&quot;#9&quot;,&quot;11&quot;,&quot;#11&quot;,&quot;b13&quot;,&quot;13&quot;],&quot;complexTensions&quot;:true,&quot;alwaysTension&quot;:true,&quot;inversions&quot;:false,&quot;inversionsOnly&quot;:false,&quot;roots&quot;:&quot;all&quot;,&quot;duration&quot;:10,&quot;reveal&quot;:&quot;always&quot;}"><div>
+                        <div class="practice-idea-title">Live-arranging simulation<span class="level-meter" role="img" aria-label="Difficulty 4 of 5"><i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i></span><span class="apply-hint">Set up &#8594;</span></div>
+                        <div class="practice-idea-desc">Decide in real time whether each new chord wants comping, soloing, or silence from you, like reading a bandstand.</div>
+                    </div></li>
+                </ol>
+            </div>
+        </details>
+
+        <div class="preset-toast" id="dronePresetToast"></div>
     </div>
 </div>
 
@@ -627,7 +1286,20 @@
     // ══════════════════════════════════════════════════════════════════════
     let droneCtx, droneOscs=[], droneGains=[], droneMaster, droneDry, droneWet, droneReverb;
     let dronePlaying=false, dronePaused=false, droneChord=null, droneTimer=null;
-    let droneDur=15, droneTimeLeft=15, droneSound='strings', droneShow=false;
+    let droneDur=15, droneTimeLeft=15, droneSound='strings';
+    // Reveal Mode: 'peek' (tap the chord display to reveal just the current chord —
+    // resets next chord; never tapping behaves exactly like a "never show" mode
+    // would, so that third state was cut) or 'always' (show immediately).
+    let droneRevealMode='peek', dronePeeked=false;
+    // Lookahead: the chord that will become current on the NEXT advance, generated
+    // ahead of time so it can be previewed — for exercises about landing on a
+    // target note the instant a new chord starts, which needs advance knowledge
+    // of what that chord actually is, not just the current one.
+    let droneNextChord=null, dronePreviewNext=false;
+    // Some exercises (technique drilling) are self-paced — you work a pattern
+    // until it's clean, however long that takes. A preset can ask for the drone
+    // to hold on one chord instead of auto-advancing; you move it with Next →.
+    let droneFreezeOnStart=false;
     let droneEnabled=new Set(['major','minor','dominant','altered','diminished']); // legacy — only read by droneGenFixed's defensive fallback
     // Read initial state from the actual checkboxes in the DOM, not a hardcoded
     // assumption — browsers restore checkbox `checked` state across reloads
@@ -642,16 +1314,28 @@
     let droneEnabledTensions = readCheckedValues('.tension-check');
     let droneEnabledRoots=new Set(['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B']);
     let droneHistory=[], droneHistoryIdx=-1;
-    let droneInversions=false;
+    let droneInversions=false, droneInversionsOnly=false;
     let droneCircleMode=null; // null | 'fifths' | 'fourths'
     let droneCircleIdx=0;
+    let droneStepMode=null; // null | 'up' | 'down' — steps through whichever roots are currently
+    let droneStepIdx=0;     // enabled, in real pitch order, instead of the fixed 12-note fifths/fourths cycle
+    // "Resolve Dominants" mode: alternates a dominant 7 with its actual V7-I
+    // resolution a perfect 4th up (major or minor tonic) — a deterministic two-
+    // phase generator, not a pick from the checkbox pool, since that's the only
+    // way to guarantee the "next" chord genuinely is the resolution.
+    let droneResolveMode=null;   // null | 'major' | 'minor'
+    let droneResolvePhase=0;     // 0 = about to generate the dominant, 1 = about to generate its resolution
+    let droneResolveDomRoot=null;
     const CIRCLE_OF_FIFTHS  = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
     const CIRCLE_OF_FOURTHS = ['C','F','Bb','Eb','Ab','Db','Gb','B','E','A','D','G'];
     let droneMetroMode=false, droneBpm=120, droneBars=4;
     let droneMetroBeat=0, droneMetroTotal=0, droneMetroInterval=null;
+    let droneMetroNextTime=0, droneMetroSchedIdx=0; // lookahead scheduler cursor for the current chord
+    const DRONE_METRO_LOOKAHEAD=0.10; // seconds of clicks to schedule ahead of the audio clock
+    const DRONE_METRO_TICK_MS=25;     // how often the scheduler wakes to top up
     let droneClickGain=null;
     let droneForcedType=null; // set by URL ?chord= param — locks droneGen() to this exact quality
-    const INVERSION_PROBABILITY=0.15; // how often a slash-chord bass note appears when Inversions is checked — "sprinkled in", not constant
+    const INVERSION_PROBABILITY=0.15; // how often a slash-chord bass note appears when only "Allow" is checked — "sprinkled in," not constant. "Only" bypasses this entirely and forces one on every chord.
     // Common slash-chord bass notes that AREN'T part of the chord itself (so plain
     // inversion logic — bass = an existing chord tone — never reaches them). These
     // are extremely common in real playing: G/A, C/D, F/G, G/E, etc. Offsets are
@@ -754,6 +1438,33 @@
         sus4:       { dom7: ['9','13'] },
     };
 
+    // Picks a root from the enabled pool, avoiding an immediate repeat of the
+    // previous chord's root — unless that's the only root enabled, in which
+    // case repeating it is the entire point (a static-root drill). Applies to
+    // the free-pool path only; Circle mode already can't repeat consecutively
+    // since it steps through a fixed 12-root sequence.
+    function dronePickRoot(availRoots) {
+        let pool = availRoots;
+        if (availRoots.length > 1 && droneChord && availRoots.includes(droneChord.root)) {
+            const filtered = availRoots.filter(rt => rt !== droneChord.root);
+            if (filtered.length) pool = filtered;
+        }
+        return pool[~~(Math.random() * pool.length)];
+    }
+
+    // Step Up/Down mode: walk the currently-enabled roots in real ascending
+    // (or descending) pitch order, one step per chord, wrapping around — a
+    // genuine chromatic/scalar run through whatever's checked, not a random
+    // pick from the pool.
+    function dronePickStepRoot() {
+        let sortedEnabled = droneRoots.filter(rt => droneEnabledRoots.has(rt));
+        if (!sortedEnabled.length) sortedEnabled = ['C'];
+        if (droneStepMode === 'down') sortedEnabled = [...sortedEnabled].reverse();
+        const root = sortedEnabled[droneStepIdx % sortedEnabled.length];
+        droneStepIdx++;
+        return root;
+    }
+
     function droneGenNew() {
         // Pick a shape
         const shapes = Object.keys(SHAPE_DEFS).filter(s => droneEnabledShapes.has(s));
@@ -780,6 +1491,8 @@
             const circle = droneCircleMode === 'fifths' ? CIRCLE_OF_FIFTHS : CIRCLE_OF_FOURTHS;
             r = circle[droneCircleIdx % 12];
             droneCircleIdx++;
+        } else if (droneStepMode) {
+            r = dronePickStepRoot();
         } else {
             let availRoots = droneRoots.filter(rt => droneEnabledRoots.has(rt));
             if (!availRoots.length) {
@@ -789,7 +1502,7 @@
                 if (cb) cb.classList.add('active');
                 availRoots = ['C'];
             }
-            r = availRoots[~~(Math.random() * availRoots.length)];
+            r = dronePickRoot(availRoots);
         }
         const ro = droneRoots.indexOf(r);
 
@@ -836,7 +1549,7 @@
         voicing = voicing.filter(i => i <= intervals[0] + 24);
 
         let bassNoteName = null;
-        if (droneInversions && sortedTones.length >= 2 && Math.random() < INVERSION_PROBABILITY) {
+        if (sortedTones.length >= 2 && (droneInversionsOnly || (droneInversions && Math.random() < INVERSION_PROBABILITY))) {
             const trueInversions = sortedTones.slice(1, 4); // 3rd/5th/7th — bass is already a chord tone
             const slashOptions = SLASH_BASS_OFFSETS.filter(off => !sortedTones.includes(off)); // don't duplicate a real chord tone
             const options = [...trueInversions, ...slashOptions];
@@ -865,6 +1578,10 @@
         dark:    { layers:[{w:'sawtooth',detunes:[-4,0,4],gain:0.5},{w:'triangle',detunes:[0],gain:0.35}], attack:3.5, filter:{type:'lowpass',freq:550,q:1.5}, vol:1.2 },
         pad:     { layers:[{w:'sine',detunes:[-5,0,5],gain:0.5},{w:'sine',detunes:[0],gain:0.3}], attack:2.0, filter:{type:'lowpass',freq:2000,q:0.5}, vol:1.0 },
         bells:   { layers:[{w:'triangle',detunes:[0],gain:0.6},{w:'sine',detunes:[0],gain:0.4,octaveUp:true}], attack:0.01, filter:{type:'lowpass',freq:4000,q:1}, vol:0.8 },
+        // Electric-piano-ish: near-instant onset (you hear the chord right away, no
+        // swell), rounded sine-heavy tone through a gentle lowpass so it isn't harsh,
+        // plus a short release so fast chord changes don't smear into each other.
+        keys:    { layers:[{w:'sine',detunes:[0],gain:0.6},{w:'triangle',detunes:[0],gain:0.3,octaveUp:true},{w:'sine',detunes:[-3,3],gain:0.1}], attack:0.012, release:0.15, filter:{type:'lowpass',freq:2800,q:0.5}, vol:0.95 },
     };
 
     function droneInit() {
@@ -890,17 +1607,20 @@
         if (droneCtx.state==='suspended') droneCtx.resume();
     }
 
-    function droneClick(accent) {
+    // Schedules a click to sound at a precise audio-clock time `when` (not "now").
+    // Web Audio plays it exactly on time regardless of when this JS runs, which
+    // is what kills the startup jitter — the flaky part (the setInterval that
+    // decides WHEN to schedule) no longer decides when the sound actually fires.
+    function droneClickAt(accent, when) {
         if (!droneCtx || !droneClickGain) return;
-        const now = droneCtx.currentTime;
         const osc = droneCtx.createOscillator();
         const g = droneCtx.createGain();
         osc.frequency.value = accent ? 1200 : 800;
         osc.type = 'sine';
-        g.gain.setValueAtTime(accent ? 0.6 : 0.3, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        g.gain.setValueAtTime(accent ? 0.6 : 0.3, when);
+        g.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
         osc.connect(g); g.connect(droneClickGain);
-        osc.start(now); osc.stop(now + 0.06);
+        osc.start(when); osc.stop(when + 0.06);
     }
 
     function droneMetroDuration() {
@@ -908,7 +1628,56 @@
         return droneBars * 4 * (60 / droneBpm);
     }
 
+    // Builds one plain chord object (no tensions, no inversions) straight from
+    // the shape/seventh tables — the shared construction Resolve Dominants mode
+    // uses, since it needs to place exact chords deterministically rather than
+    // pick from the checkbox pool.
+    function droneBuildChord(root, shapeId, seventhId) {
+        const ro = droneRoots.indexOf(root);
+        const seventhDef = SEVENTH_DEFS[shapeId][seventhId];
+        const intervals = [...SHAPE_DEFS[shapeId].triad];
+        if (seventhDef.i !== null) intervals.push(seventhDef.i);
+        const sortedTones = [...intervals].sort((a, b) => a - b);
+        let voicing = [sortedTones[0] - 12];
+        let cursor = sortedTones[0];
+        for (let k = 1; k < sortedTones.length; k++) {
+            let target = sortedTones[k];
+            while (target <= cursor) target += 12;
+            voicing.push(target);
+            cursor = target;
+        }
+        voicing = voicing.filter(i => i <= intervals[0] + 24);
+        return {
+            sym: root + seventhDef.sym,
+            root,
+            freqs: voicing.map(i => droneFreq(ro + i)),
+            notes: voicing.map(i => droneRoots[((ro + i) % 12 + 12) % 12]).join(' - '),
+        };
+    }
+
+    // Resolve Dominants: phase 0 plays a dominant 7 on a root from the enabled
+    // pool; phase 1 plays its actual resolution — the tonic a perfect 4th up
+    // (real V7-I motion), major or minor depending on which button is active.
+    function droneGenResolve() {
+        if (droneResolvePhase === 0) {
+            let availRoots = droneRoots.filter(rt => droneEnabledRoots.has(rt));
+            if (!availRoots.length) availRoots = ['C'];
+            const r = dronePickRoot(availRoots);
+            droneResolveDomRoot = r;
+            droneResolvePhase = 1;
+            return droneBuildChord(r, 'major', 'dom7');
+        } else {
+            const domIdx = droneRoots.indexOf(droneResolveDomRoot);
+            const tonicRoot = droneRoots[(domIdx + 5) % 12]; // up a perfect 4th = the dominant's actual tonic
+            droneResolvePhase = 0;
+            return droneResolveMode === 'minor'
+                ? droneBuildChord(tonicRoot, 'minor', 'dom7')  // "dom7" seventh on the minor shape IS the m7 sound
+                : droneBuildChord(tonicRoot, 'major', 'maj7');
+        }
+    }
+
     function droneGen() {
+        if (droneResolveMode) return droneGenResolve();
         return droneForcedType ? droneGenFixed() : droneGenNew();
     }
 
@@ -920,6 +1689,8 @@
             const circle = droneCircleMode === 'fifths' ? CIRCLE_OF_FIFTHS : CIRCLE_OF_FOURTHS;
             r = circle[droneCircleIdx % 12];
             droneCircleIdx++;
+        } else if (droneStepMode) {
+            r = dronePickStepRoot();
         } else {
             let availRoots = droneRoots.filter(r => droneEnabledRoots.has(r));
             if (!availRoots.length) {
@@ -928,7 +1699,7 @@
                 if (cb) cb.classList.add('active');
                 availRoots = ['C'];
             }
-            r = availRoots[~~(Math.random() * availRoots.length)];
+            r = dronePickRoot(availRoots);
         }
         const t=avail[~~(Math.random()*avail.length)];
         const ro=droneRoots.indexOf(r);
@@ -957,7 +1728,7 @@
         // Inversion: bass is either a real chord tone (true inversion) or one of a
         // handful of common non-chord-tone slash-bass notes (G/A, C/D, etc.)
         let bassNoteName = null;
-        if (droneInversions && sortedTones.length >= 2 && Math.random() < INVERSION_PROBABILITY) {
+        if (sortedTones.length >= 2 && (droneInversionsOnly || (droneInversions && Math.random() < INVERSION_PROBABILITY))) {
             const trueInversions = sortedTones.slice(1, 4); // 3rd, 5th, 7th (skip root)
             const slashOptions = SLASH_BASS_OFFSETS.filter(off => !sortedTones.includes(off));
             const options = [...trueInversions, ...slashOptions];
@@ -978,9 +1749,10 @@
         };
     }
 
-    function dronePlay(ch) {
-        droneStop(); droneOscs=[]; droneGains=[];
-        const now = droneCtx.currentTime;
+    function dronePlay(ch, when) {
+        if (when === undefined) when = droneCtx.currentTime;
+        droneStop(when); droneOscs=[]; droneGains=[];
+        const now = when;
         const patch = dronePatchDefs[droneSound];
 
         ch.freqs.forEach(freq => {
@@ -1020,19 +1792,40 @@
         });
     }
 
-    function droneStop() {
+    function droneStop(when) {
         if (!droneCtx) return;
-        const now = droneCtx.currentTime;
+        const now = when === undefined ? droneCtx.currentTime : when;
+        const rel = (dronePatchDefs[droneSound] && dronePatchDefs[droneSound].release) || 0.8;
         droneOscs.forEach((o, i) => {
             const g = droneGains[i];
             if (g) {
                 g.gain.cancelScheduledValues(now);
                 g.gain.setValueAtTime(g.gain.value, now);
-                g.gain.linearRampToValueAtTime(0, now + 0.8);
+                g.gain.linearRampToValueAtTime(0, now + rel);
             }
-            try { o.stop(now + 0.8); } catch(e) {}
+            try { o.stop(now + rel); } catch(e) {}
         });
         droneOscs=[]; droneGains=[];
+    }
+
+    // Computes (and, in metro mode, advances) the exact audio-clock time this
+    // chord's sound-change and beat 0 should land on — the ONE anchor that both
+    // dronePlay() and droneStartTimer()'s click scheduler read, so the pad swap
+    // and the metronome's own downbeat for this chord are sample-accurate to
+    // each other, not just the clicks to one another.
+    function droneAnchorMetroTime() {
+        if (!droneCtx) return 0;
+        if (!droneMetroMode) return droneCtx.currentTime;
+        if (!droneMetroNextTime) {
+            // First chord after Start — pad so the audio clock has settled.
+            droneMetroNextTime = droneCtx.currentTime + 0.12;
+        } else {
+            // Continuing mid-session (or called again moments later by
+            // droneStartTimer — idempotent, since barely any time passes) —
+            // keep the carried-over grid time unless we somehow arrived after it.
+            droneMetroNextTime = Math.max(droneMetroNextTime, droneCtx.currentTime + 0.02);
+        }
+        return droneMetroNextTime;
     }
 
     function droneNext() {
@@ -1040,12 +1833,17 @@
         if (droneHistoryIdx < droneHistory.length - 1) {
             droneHistory = droneHistory.slice(0, droneHistoryIdx + 1);
         }
-        droneChord=droneGen();
+        // Promote the pre-generated lookahead if we have one, so what was
+        // previewed is exactly what plays — only the very first chord (no
+        // lookahead exists yet) falls back to generating fresh here.
+        droneChord = droneNextChord || droneGen();
+        droneNextChord = droneGen(); // refill the lookahead for the chord after this one
         droneHistory.push(droneChord);
         if (droneHistory.length > 10) droneHistory.shift();
         droneHistoryIdx=droneHistory.length-1;
+        dronePeeked=false; // new chord — a Peek from the last one doesn't carry over
         document.getElementById('droneBackBtn').disabled = droneHistoryIdx <= 0;
-        if (dronePlaying){dronePlay(droneChord); droneStartTimer();}
+        if (dronePlaying){ const when = droneAnchorMetroTime(); dronePlay(droneChord, when); droneStartTimer(); }
         droneUpdateDisplay();
     }
 
@@ -1053,41 +1851,38 @@
         if (droneHistoryIdx <= 0) return;
         droneHistoryIdx--;
         droneChord=droneHistory[droneHistoryIdx];
+        dronePeeked=false;
+        // Next after a Back truncates forward history and generates fresh (see
+        // above), so a freshly-generated lookahead here stays accurate for that.
+        droneNextChord = droneGen();
         document.getElementById('droneBackBtn').disabled = droneHistoryIdx <= 0;
-        if (dronePlaying){dronePlay(droneChord); droneStartTimer();}
+        if (dronePlaying){ const when = droneAnchorMetroTime(); dronePlay(droneChord, when); droneStartTimer(); }
         droneUpdateDisplay();
     }
 
     function droneUpdateDisplay() {
         const sym = document.getElementById('droneSymbol');
         const notes = document.getElementById('droneNotes');
-        if (droneShow && droneChord) {
+        const display = document.getElementById('droneChordDisplay');
+        const isPeekMode = droneRevealMode === 'peek';
+        const revealed = droneChord && (droneRevealMode === 'always' || (isPeekMode && dronePeeked));
+        if (revealed) {
             sym.textContent = droneChord.sym;
             sym.classList.remove('hidden');
             notes.textContent = droneChord.notes;
         } else {
             sym.textContent = '???';
             sym.classList.add('hidden');
-            notes.textContent = '';
+            notes.textContent = (isPeekMode && droneChord) ? 'Tap to reveal' : '';
         }
-        droneUpdateHistoryUI();
-    }
-
-    function droneUpdateHistoryUI() {
-        const list = document.getElementById('droneHistoryList');
-        const card = document.getElementById('droneHistoryCard');
-        if (droneHistory.length === 0) { card.style.display = 'none'; return; }
-        card.style.display = 'block';
-        list.innerHTML = '';
-        droneHistory.forEach((ch, idx) => {
-            const el = document.createElement('div');
-            el.className = 'history-item' + (idx === droneHistoryIdx ? ' current' : '');
-            const label = droneShow ? ch.sym : '???';
-            el.innerHTML = `<span class="h-sym">${label}</span><span class="h-num">#${idx + 1}</span>`;
-            list.appendChild(el);
-        });
-        // scroll to bottom (most recent)
-        list.scrollTop = list.scrollHeight;
+        display.classList.toggle('peekable', isPeekMode && !!droneChord && !dronePeeked);
+        const preview = document.getElementById('dronePreview');
+        if (dronePreviewNext && droneNextChord) {
+            preview.textContent = 'Next: ' + droneNextChord.sym;
+            preview.hidden = false;
+        } else {
+            preview.hidden = true;
+        }
     }
 
     function droneUpdateProgress() {
@@ -1097,9 +1892,10 @@
     }
 
     function droneStartTimer() {
-        // clear any existing timers
-        if (droneTimer) clearInterval(droneTimer);
-        if (droneMetroInterval) clearInterval(droneMetroInterval);
+        // clear any existing timers (droneTimer may be a setInterval OR a
+        // setTimeout depending on mode — clearTimeout/clearInterval are aliases)
+        if (droneTimer) { clearTimeout(droneTimer); droneTimer = null; }
+        if (droneMetroInterval) { clearInterval(droneMetroInterval); droneMetroInterval = null; }
 
         const totalDur = droneMetroMode ? droneMetroDuration() : droneDur;
         droneTimeLeft = totalDur;
@@ -1119,20 +1915,51 @@
             const totalBeats = droneBars * 4;
             droneMetroBeat = 0;
             droneMetroTotal = totalBeats;
-            droneClick(true); // beat 1 accent
+            droneMetroSchedIdx = 0;
+            // droneNext()/droneBack() already called droneAnchorMetroTime() right
+            // before dronePlay() — calling it again here is idempotent (barely any
+            // time has passed) and keeps this function correct even when called on
+            // its own (the "stuck after Freeze" recovery path below has no chord
+            // change to anchor from).
+            droneAnchorMetroTime();
+
             droneMetroInterval = setInterval(() => {
-                if (dronePaused) return;
-                droneMetroBeat++;
-                if (droneMetroBeat >= totalBeats) {
-                    droneNext();
-                } else {
-                    droneClick(droneMetroBeat % 4 === 0); // accent on bar 1
-                    const beatsLeft = totalBeats - droneMetroBeat;
-                    const barsLeft = Math.ceil(beatsLeft / 4);
-                    document.getElementById('droneStatus').textContent =
-                        `Beat ${(droneMetroBeat % 4) + 1}  ·  ${barsLeft} bar${barsLeft !== 1 ? 's' : ''} left`;
+                if (dronePaused || !droneCtx) return;
+                // Only snap forward on a REAL stall (more than a beat behind) —
+                // startup jank, a resumed Freeze, a backgrounded tab. A few ms of
+                // ordinary timer slop must not reset the grid.
+                if (droneMetroNextTime < droneCtx.currentTime - beatDur) {
+                    droneMetroNextTime = droneCtx.currentTime + 0.05;
                 }
-            }, beatDur * 1000);
+                // Schedule every beat that lands inside the lookahead window.
+                while (droneMetroSchedIdx < totalBeats &&
+                       droneMetroNextTime < droneCtx.currentTime + DRONE_METRO_LOOKAHEAD) {
+                    droneClickAt(droneMetroSchedIdx % 4 === 0, droneMetroNextTime);
+                    droneMetroSchedIdx++;
+                    droneMetroBeat = droneMetroSchedIdx;
+                    const beatsLeft = totalBeats - droneMetroSchedIdx;
+                    const barsLeft = Math.ceil(beatsLeft / 4);
+                    document.getElementById('droneStatus').textContent = beatsLeft > 0
+                        ? `Beat ${((droneMetroSchedIdx - 1) % 4) + 1}  ·  ${barsLeft} bar${barsLeft !== 1 ? 's' : ''} left`
+                        : `Beat ${((droneMetroSchedIdx - 1) % 4) + 1}`;
+                    droneMetroNextTime += beatDur;
+                }
+                // All beats for this chord are scheduled — hand off to the next
+                // chord right after the last one is due to sound.
+                if (droneMetroSchedIdx >= totalBeats) {
+                    clearInterval(droneMetroInterval);
+                    droneMetroInterval = null;
+                    // Advance ~130ms early so droneNext()/droneStartTimer() run
+                    // BEFORE the next chord's beat 0 is due — the fresh scheduler
+                    // then places that beat precisely on the carried-over grid,
+                    // leaving no gap at the chord change.
+                    const untilAdvanceMs = Math.max(0, (droneMetroNextTime - droneCtx.currentTime) * 1000 - 130);
+                    droneTimer = setTimeout(() => {
+                        droneTimer = null;
+                        if (dronePlaying && droneMetroMode && !dronePaused) droneNext();
+                    }, untilAdvanceMs);
+                }
+            }, DRONE_METRO_TICK_MS);
         } else {
             droneTimer = setInterval(() => {
                 if (dronePaused) return;
@@ -1143,12 +1970,13 @@
         }
     }
 
-    document.querySelectorAll('.sound-btn').forEach(b=>{
-        b.onclick=()=>{
-            document.querySelectorAll('.sound-btn').forEach(x=>x.classList.remove('active'));
-            b.classList.add('active'); droneSound=b.dataset.sound;
-            if (dronePlaying&&droneChord) dronePlay(droneChord);
-        };
+    function droneSetSound(soundId) {
+        droneSound = soundId;
+        document.querySelectorAll('.sound-btn[data-sound]').forEach(b => b.classList.toggle('active', b.dataset.sound === soundId));
+        if (dronePlaying && droneChord) dronePlay(droneChord);
+    }
+    document.querySelectorAll('.sound-btn[data-sound]').forEach(b=>{
+        b.onclick=()=>droneSetSound(b.dataset.sound);
     });
 
     // Touching any of these means the musician is deliberately steering away
@@ -1175,18 +2003,24 @@
                 document.getElementById('droneNextBtn').disabled=false;
                 droneHistory=[]; droneHistoryIdx=-1;
                 droneNext();
+                if (droneFreezeOnStart) {
+                    droneFreezeOnStart = false;
+                    document.getElementById('dronePauseBtn').click(); // hold on this chord — a self-paced drill
+                }
             });
         } else {
             dronePlaying=false; dronePaused=false;
+            droneNextChord=null; // settings may change before the next Start — don't carry a stale lookahead
+            droneFreezeOnStart=false;
             document.getElementById('droneStartBtn').textContent='Start';
             const pauseBtn=document.getElementById('dronePauseBtn');
             pauseBtn.disabled=true; pauseBtn.textContent='Freeze'; pauseBtn.classList.remove('active');
             document.getElementById('droneBackBtn').disabled=true;
             document.getElementById('droneNextBtn').disabled=true;
-            document.getElementById('droneHistoryCard').style.display='none';
             droneStop();
-            if (droneTimer) clearInterval(droneTimer);
-            if (droneMetroInterval) clearInterval(droneMetroInterval);
+            if (droneTimer) { clearTimeout(droneTimer); droneTimer = null; }
+            if (droneMetroInterval) { clearInterval(droneMetroInterval); droneMetroInterval = null; }
+            droneMetroNextTime = 0; // next Start re-anchors the beat grid from scratch
             document.getElementById('droneStatus').textContent='Stopped';
             const wrap=document.getElementById('droneProgressWrap');
             const bar=document.getElementById('droneProgressBar');
@@ -1218,6 +2052,12 @@
             document.getElementById('droneStatus').textContent = droneMetroMode
                 ? `Beat ${(droneMetroBeat % 4) + 1}`
                 : `Next in ${droneTimeLeft}s`;
+            // In metro mode, if the freeze landed after all beats were already
+            // scheduled (scheduler cleared, advance timer skipped while paused),
+            // nothing is left to resume — restart the current chord's count.
+            if (droneMetroMode && !droneMetroInterval && !droneTimer) {
+                droneStartTimer();
+            }
         }
     };
 
@@ -1238,25 +2078,61 @@
         };
     });
 
-    function setCircleMode(mode) {
-        droneCircleMode = droneCircleMode === mode ? null : mode;
-        droneCircleIdx = droneCircleMode ? ~~(Math.random() * 12) : 0;
+    // Sets circle mode outright (mode: null | 'fifths' | 'fourths') — no toggling,
+    // so it's safe to call from anywhere that needs a deterministic result
+    // (the click handler below still does its own toggle-if-same-mode first).
+    function droneApplyCircle(mode) {
+        droneCircleMode = mode;
+        droneCircleIdx = mode ? ~~(Math.random() * 12) : 0;
         const rootGrid = document.querySelector('.root-grid');
         const rootAllRow = document.getElementById('rootAllRow');
-        const fifthsBtn = document.getElementById('circFifthsBtn');
-        const fourthsBtn = document.getElementById('circFourthsBtn');
-        if (droneCircleMode) {
-            rootGrid.classList.add('disabled');
-            rootAllRow.classList.add('disabled');
-        } else {
-            rootGrid.classList.remove('disabled');
-            rootAllRow.classList.remove('disabled');
-        }
-        fifthsBtn.classList.toggle('active', droneCircleMode === 'fifths');
-        fourthsBtn.classList.toggle('active', droneCircleMode === 'fourths');
+        rootGrid.classList.toggle('disabled', !!mode);
+        rootAllRow.classList.toggle('disabled', !!mode);
+        document.getElementById('circFifthsBtn').classList.toggle('active', mode === 'fifths');
+        document.getElementById('circFourthsBtn').classList.toggle('active', mode === 'fourths');
+        if (mode) { droneApplyStepMode(null); droneApplyResolveMode(null); } // only one root-picking mode at a time
+    }
+    function setCircleMode(mode) {
+        droneApplyCircle(droneCircleMode === mode ? null : mode);
     }
     document.getElementById('circFifthsBtn').onclick = () => setCircleMode('fifths');
     document.getElementById('circFourthsBtn').onclick = () => setCircleMode('fourths');
+
+    // Steps through whichever roots are currently checked, in real ascending/
+    // descending pitch order — unlike Circle mode, which always walks the fixed
+    // 12-note fifths/fourths sequence regardless of what's checked. This is what
+    // actually makes something like "select C through F chromatically, step up"
+    // a genuine chromatic run instead of two roots randomly ping-ponging.
+    function droneApplyStepMode(mode) {
+        droneStepMode = mode;
+        droneStepIdx = 0;
+        document.getElementById('stepUpBtn').classList.toggle('active', mode === 'up');
+        document.getElementById('stepDownBtn').classList.toggle('active', mode === 'down');
+        if (mode) { droneApplyCircle(null); droneApplyResolveMode(null); }
+    }
+    function setStepMode(mode) {
+        droneApplyStepMode(droneStepMode === mode ? null : mode);
+    }
+    document.getElementById('stepUpBtn').onclick = () => setStepMode('up');
+    document.getElementById('stepDownBtn').onclick = () => setStepMode('down');
+
+    // Resolve Dominants: forces a deterministic V7-I alternation instead of
+    // picking from the checkbox pool — see droneGenResolve(). Uses the enabled
+    // roots as the pool of keys to resolve IN (the dominant's root), same as
+    // Step mode, so the root grid stays editable rather than disabled.
+    function droneApplyResolveMode(mode) {
+        droneResolveMode = mode;
+        droneResolvePhase = 0;
+        droneResolveDomRoot = null;
+        document.getElementById('resolveMajorBtn').classList.toggle('active', mode === 'major');
+        document.getElementById('resolveMinorBtn').classList.toggle('active', mode === 'minor');
+        if (mode) { droneApplyCircle(null); droneApplyStepMode(null); }
+    }
+    function setResolveMode(mode) {
+        droneApplyResolveMode(droneResolveMode === mode ? null : mode);
+    }
+    document.getElementById('resolveMajorBtn').onclick = () => setResolveMode('major');
+    document.getElementById('resolveMinorBtn').onclick = () => setResolveMode('minor');
 
     document.getElementById('rootSelectAll').onclick = () => {
         droneRoots.forEach(r => droneEnabledRoots.add(r));
@@ -1286,11 +2162,38 @@
 
     document.getElementById('inversionCheck').onchange=e=>{
         droneInversions = e.target.checked;
+        // Unchecking "Allow" while "Only" is still on would leave a contradictory
+        // pair on screen (Only checked, Allow unchecked) — clear Only too.
+        if (!droneInversions && droneInversionsOnly) {
+            droneInversionsOnly = false;
+            document.getElementById('inversionOnlyCheck').checked = false;
+        }
+    };
+    document.getElementById('inversionOnlyCheck').onchange=e=>{
+        droneInversionsOnly = e.target.checked;
+        // "Only" implies "Allow" — check it too so the pair reads consistently,
+        // even though the generator logic below doesn't actually require it.
+        if (droneInversionsOnly && !droneInversions) {
+            droneInversions = true;
+            document.getElementById('inversionCheck').checked = true;
+        }
     };
 
-    document.getElementById('droneShowBtn').onclick=()=>{
-        droneShow=!droneShow;
-        document.getElementById('droneShowBtn').classList.toggle('active');
+    document.querySelectorAll('.reveal-mode-btn').forEach(btn => {
+        btn.onclick = () => {
+            droneRevealMode = btn.dataset.mode;
+            document.querySelectorAll('.reveal-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+            droneUpdateDisplay();
+        };
+    });
+    document.getElementById('droneChordDisplay').onclick = () => {
+        if (droneRevealMode === 'peek' && droneChord && !dronePeeked) {
+            dronePeeked = true;
+            droneUpdateDisplay();
+        }
+    };
+    document.getElementById('previewNextCheck').onchange = e => {
+        dronePreviewNext = e.target.checked;
         droneUpdateDisplay();
     };
 
@@ -1323,6 +2226,10 @@
         document.getElementById('modeSeconds').classList.remove('active');
         document.getElementById('metroControls').style.display='block';
         document.getElementById('secControls').style.display='none';
+        // Default to the fast-attack Keys patch — a slow pad swell blurs exactly
+        // where the downbeat lands, which defeats the point of the click. A
+        // preset that wants a different sound can still set it afterward.
+        droneSetSound('keys');
     };
 
     // Maps each fixed-vocabulary chord (only ever reached via a URL-pinned
@@ -1365,6 +2272,129 @@
         droneEnabledTensions = new Set(tensionIds);
         document.querySelectorAll('.tension-check').forEach(cb => { cb.checked = tensionIds.includes(cb.value); });
     }
+
+    // ── Practice Ideas: one-click presets ──────────────────────────────────
+    // Each list item can carry a data-preset (JSON) describing the exact
+    // control state that exercise wants. Same underlying pool the checkboxes
+    // already drive (droneEnabledShapes/Sevenths/Tensions/Roots) — nothing new,
+    // just set programmatically instead of by hand.
+    let dronePresetToastTimer = null;
+    function droneShowToast(msg) {
+        const el = document.getElementById('dronePresetToast');
+        el.textContent = msg;
+        el.classList.add('show');
+        clearTimeout(dronePresetToastTimer);
+        dronePresetToastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+    }
+    function droneApplyPreset(preset, label) {
+        if (preset.shapes) {
+            droneEnabledShapes = new Set(preset.shapes);
+            document.querySelectorAll('.shape-check').forEach(cb => { cb.checked = preset.shapes.includes(cb.value); });
+        }
+        if (preset.sevenths) {
+            droneEnabledSevenths = new Set(preset.sevenths);
+            document.querySelectorAll('.seventh-check').forEach(cb => { cb.checked = preset.sevenths.includes(cb.value); });
+        }
+        if (preset.tensions) {
+            droneEnabledTensions = new Set(preset.tensions);
+            document.querySelectorAll('.tension-check').forEach(cb => { cb.checked = preset.tensions.includes(cb.value); });
+        }
+        if (preset.complexTensions !== undefined) {
+            document.getElementById('complexChordsToggle').checked = preset.complexTensions;
+        }
+        if (preset.alwaysTension !== undefined) {
+            document.getElementById('alwaysTensionToggle').checked = preset.alwaysTension;
+        }
+        if (preset.inversions !== undefined) {
+            droneInversions = preset.inversions;
+            document.getElementById('inversionCheck').checked = preset.inversions;
+        }
+        if (preset.inversionsOnly !== undefined) {
+            droneInversionsOnly = preset.inversionsOnly;
+            document.getElementById('inversionOnlyCheck').checked = preset.inversionsOnly;
+        }
+        if (preset.circle) {
+            droneApplyCircle(preset.circle);
+        } else if (preset.stepMode) {
+            droneApplyStepMode(preset.stepMode);
+            if (preset.roots) {
+                const rootSet = preset.roots === 'all' ? new Set(droneRoots) : new Set(preset.roots);
+                droneEnabledRoots = rootSet;
+                document.querySelectorAll('.root-btn').forEach(b => {
+                    b.classList.toggle('active', rootSet.has(b.dataset.root));
+                });
+            }
+        } else if (preset.resolveMode) {
+            droneApplyResolveMode(preset.resolveMode);
+            if (preset.roots) {
+                const rootSet = preset.roots === 'all' ? new Set(droneRoots) : new Set(preset.roots);
+                droneEnabledRoots = rootSet;
+                document.querySelectorAll('.root-btn').forEach(b => {
+                    b.classList.toggle('active', rootSet.has(b.dataset.root));
+                });
+            }
+        } else if (preset.roots) {
+            droneApplyResolveMode(null);
+            droneApplyCircle(null);
+            droneApplyStepMode(null);
+            const rootSet = preset.roots === 'all' ? new Set(droneRoots) : new Set(preset.roots);
+            droneEnabledRoots = rootSet;
+            document.querySelectorAll('.root-btn').forEach(b => {
+                b.classList.toggle('active', rootSet.has(b.dataset.root));
+            });
+        }
+        if (preset.metro) {
+            document.getElementById('modeMetro').click();
+            const bpm = preset.metro.bpm || droneBpm, bars = preset.metro.bars || droneBars;
+            droneBpm = bpm; droneBars = bars;
+            document.getElementById('bpmSlider').value = bpm;
+            document.getElementById('bpmVal').textContent = bpm;
+            document.getElementById('barsSlider').value = bars;
+            document.getElementById('barsVal').textContent = bars;
+        } else if (preset.duration) {
+            document.getElementById('modeSeconds').click();
+            droneDur = preset.duration;
+            document.getElementById('durSlider').value = preset.duration;
+            document.getElementById('durVal').textContent = preset.duration;
+        }
+        if (preset.reveal) {
+            droneRevealMode = preset.reveal;
+            document.querySelectorAll('.reveal-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === preset.reveal));
+        }
+        if (preset.previewNext !== undefined) {
+            dronePreviewNext = preset.previewNext;
+            document.getElementById('previewNextCheck').checked = preset.previewNext;
+        }
+        if (preset.sound) {
+            // Sound is aesthetic preference, so — unlike the exercise-critical
+            // knobs — a preset only sets it when it actually matters (a fast
+            // exercise needs the fast-attack patch); otherwise it's left alone.
+            droneSound = preset.sound;
+            document.querySelectorAll('.sound-btn[data-sound]').forEach(b => b.classList.toggle('active', b.dataset.sound === preset.sound));
+        }
+        droneForcedType = null; // presets work through the normal checkbox pool, never the single-locked-type path
+        dronePeeked = false;
+
+        const wantFreeze = !!preset.freeze;
+        droneFreezeOnStart = wantFreeze && !dronePlaying; // if not started yet, freeze the moment it does
+        if (dronePlaying) {
+            droneNext();
+            if (wantFreeze && !dronePaused) document.getElementById('dronePauseBtn').click();
+        } else {
+            droneUpdateDisplay();
+        }
+        document.getElementById('droneStartBtn').scrollIntoView({behavior:'smooth', block:'center'});
+        droneShowToast('Applied: ' + label);
+    }
+    document.querySelectorAll('.practice-ideas-list li[data-preset]').forEach(li => {
+        li.classList.add('is-clickable');
+        li.addEventListener('click', () => {
+            try {
+                const preset = JSON.parse(li.dataset.preset);
+                droneApplyPreset(preset, li.dataset.title || 'exercise');
+            } catch (e) { console.warn('[practice ideas] bad preset JSON', e); }
+        });
+    });
 
     // ── URL param configuration ──────────────────────────────────────────
     // When opened plain (no params — e.g. from the Practice Tools grid), this stays
@@ -1414,9 +2444,9 @@
         }
 
         // Sound
-        if (soundParam && ['strings','warm','shimmer','pad'].includes(soundParam)) {
+        if (soundParam && ['strings','warm','shimmer','pad','keys'].includes(soundParam)) {
             droneSound = soundParam;
-            document.querySelectorAll('.sound-btn').forEach(b => {
+            document.querySelectorAll('.sound-btn[data-sound]').forEach(b => {
                 b.classList.toggle('active', b.dataset.sound === soundParam);
             });
         }
@@ -1445,11 +2475,55 @@
 
         // Show the chord symbol once we've pinned specific harmony to practice over —
         // this is no longer an ear-training guess, so hiding it would be pointless.
-        if (pinnedHarmony && !droneShow) {
-            document.getElementById('droneShowBtn').click();
+        if (pinnedHarmony && droneRevealMode !== 'always') {
+            droneRevealMode = 'always';
+            document.querySelectorAll('.reveal-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'always'));
+            droneUpdateDisplay();
         }
     })();
 
+    // ── Practice Ideas: difficulty filter ─────────────────────────────────
+    function droneFilterIdeas(level) {
+        document.querySelectorAll('.practice-ideas-category').forEach(cat => {
+            let anyVisible = false;
+            cat.querySelectorAll('.practice-ideas-list li').forEach(li => {
+                const show = level === 'all' || li.dataset.diff === level;
+                li.style.display = show ? '' : 'none';
+                if (show) anyVisible = true;
+            });
+            cat.style.display = anyVisible ? '' : 'none';
+        });
+        document.querySelectorAll('.practice-ideas-filter-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.level === level);
+        });
+    }
+    document.querySelectorAll('.practice-ideas-filter-btn').forEach(btn => {
+        btn.onclick = () => droneFilterIdeas(btn.dataset.level);
+    });
+
+    // ── Report content height to a parent page, if embedded ────────────────
+    // When opened inside an iframe (the main app's "Practice Tools" full-page
+    // view), tells the parent our real height so it can size the iframe to
+    // fit instead of boxing us into a fixed-height, internally-scrolling
+    // panel — the goal is that this reads as the page, not a box on it.
+    // '*' as the target origin is fine here since the only payload is a
+    // number; nothing sensitive is ever sent.
+    (function () {
+        if (window.parent === window) return; // not embedded — nothing to do
+        function reportHeight() {
+            window.parent.postMessage({ type: 'practiceLabToolHeight', height: document.documentElement.scrollHeight }, '*');
+        }
+        window.addEventListener('load', reportHeight);
+        window.addEventListener('resize', reportHeight);
+        const detailsEl = document.querySelector('.practice-ideas-card details');
+        if (detailsEl) detailsEl.addEventListener('toggle', reportHeight);
+        // Catches height changes from anything else clickable in here (filter
+        // buttons, category jumps, preset applies, mode switches) without
+        // needing a listener wired to every one of them individually.
+        document.addEventListener('click', () => setTimeout(reportHeight, 60));
+        setTimeout(reportHeight, 150);
+        setTimeout(reportHeight, 600);
+    })();
 </script>
 
 <!-- Cloudflare Web Analytics --><script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "b3be0e40b4e545519ebbff691359e051"}'></script><!-- End Cloudflare Web Analytics -->
