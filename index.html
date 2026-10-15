@@ -1334,7 +1334,8 @@
     const DRONE_METRO_LOOKAHEAD=0.10; // seconds of clicks to schedule ahead of the audio clock
     const DRONE_METRO_TICK_MS=25;     // how often the scheduler wakes to top up
     let droneClickGain=null;
-    let droneForcedType=null; // set by URL ?chord= param — locks droneGen() to this exact quality
+    let droneForcedTypes=null; // set by URL ?chord= / ?chords= — locks droneGen() to this set of exact qualities (one or several)
+    let droneLastFixedName=null; // so a multi-quality set never repeats the same quality twice in a row
     const INVERSION_PROBABILITY=0.15; // how often a slash-chord bass note appears when only "Allow" is checked — "sprinkled in," not constant. "Only" bypasses this entirely and forces one on every chord.
     // Common slash-chord bass notes that AREN'T part of the chord itself (so plain
     // inversion logic — bass = an existing chord tone — never reaches them). These
@@ -1359,7 +1360,7 @@
     // ══════════════════════════════════════════════════════════════════════
     // NEW COMBINATORIAL CHORD SYSTEM (manual/random mode only)
     // The fixed droneTypes above are left untouched and still drive the
-    // URL-param-locked embedded path (droneForcedType) — this new system
+    // URL-param-locked embedded path (droneForcedTypes) — this new system
     // only powers random generation when nothing is pinned.
     // ══════════════════════════════════════════════════════════════════════
 
@@ -1678,11 +1679,11 @@
 
     function droneGen() {
         if (droneResolveMode) return droneGenResolve();
-        return droneForcedType ? droneGenFixed() : droneGenNew();
+        return droneForcedTypes ? droneGenFixed() : droneGenNew();
     }
 
     function droneGenFixed() {
-        const avail = droneForcedType ? [droneForcedType] : droneTypes.filter(t=>droneEnabled.has(t.c));
+        const avail = droneForcedTypes ? droneForcedTypes : droneTypes.filter(t=>droneEnabled.has(t.c));
         if (!avail.length){droneEnabled.add('major');return droneGenFixed();}
         let r;
         if (droneCircleMode) {
@@ -1701,7 +1702,13 @@
             }
             r = dronePickRoot(availRoots);
         }
-        const t=avail[~~(Math.random()*avail.length)];
+        let pool = avail;
+        if (droneForcedTypes && avail.length > 1) {
+            const others = avail.filter(x => x.n !== droneLastFixedName);
+            if (others.length) pool = others;
+        }
+        const t=pool[~~(Math.random()*pool.length)];
+        if (droneForcedTypes) droneLastFixedName = t.n;
         const ro=droneRoots.indexOf(r);
 
         // Sort chord tones ascending and stack them in register order.
@@ -1984,13 +1991,13 @@
     // generation immediately reflects what's actually checked, rather than
     // silently ignoring the change like before.
     document.querySelectorAll('.shape-check').forEach(cb=>{
-        cb.onchange=e=>{ droneForcedType=null; e.target.checked?droneEnabledShapes.add(e.target.value):droneEnabledShapes.delete(e.target.value); };
+        cb.onchange=e=>{ droneForcedTypes=null; e.target.checked?droneEnabledShapes.add(e.target.value):droneEnabledShapes.delete(e.target.value); };
     });
     document.querySelectorAll('.seventh-check').forEach(cb=>{
-        cb.onchange=e=>{ droneForcedType=null; e.target.checked?droneEnabledSevenths.add(e.target.value):droneEnabledSevenths.delete(e.target.value); };
+        cb.onchange=e=>{ droneForcedTypes=null; e.target.checked?droneEnabledSevenths.add(e.target.value):droneEnabledSevenths.delete(e.target.value); };
     });
     document.querySelectorAll('.tension-check').forEach(cb=>{
-        cb.onchange=e=>{ droneForcedType=null; e.target.checked?droneEnabledTensions.add(e.target.value):droneEnabledTensions.delete(e.target.value); };
+        cb.onchange=e=>{ droneForcedTypes=null; e.target.checked?droneEnabledTensions.add(e.target.value):droneEnabledTensions.delete(e.target.value); };
     });
 
     document.getElementById('droneStartBtn').onclick=()=>{
@@ -2258,19 +2265,21 @@
         'dim7':    { shape: 'diminished', seventh: 'dim7', tensions: {} },
     };
 
-    function applyPinnedChordChecks(chordName) {
-        const map = DRONE_TYPE_TO_CHECKS[chordName];
-        if (!map) return;
-        const tensionIds = Object.values(map.tensions);
+    function applyPinnedChordChecks(chordNames) {
+        const maps = [].concat(chordNames).map(n => DRONE_TYPE_TO_CHECKS[n]).filter(Boolean);
+        if (!maps.length) return;
+        const shapes = new Set(maps.map(m => m.shape));
+        const sevenths = new Set(maps.map(m => m.seventh));
+        const tensionIds = new Set(maps.flatMap(m => Object.values(m.tensions)));
 
-        droneEnabledShapes = new Set([map.shape]);
-        document.querySelectorAll('.shape-check').forEach(cb => { cb.checked = cb.value === map.shape; });
+        droneEnabledShapes = shapes;
+        document.querySelectorAll('.shape-check').forEach(cb => { cb.checked = shapes.has(cb.value); });
 
-        droneEnabledSevenths = new Set([map.seventh]);
-        document.querySelectorAll('.seventh-check').forEach(cb => { cb.checked = cb.value === map.seventh; });
+        droneEnabledSevenths = sevenths;
+        document.querySelectorAll('.seventh-check').forEach(cb => { cb.checked = sevenths.has(cb.value); });
 
-        droneEnabledTensions = new Set(tensionIds);
-        document.querySelectorAll('.tension-check').forEach(cb => { cb.checked = tensionIds.includes(cb.value); });
+        droneEnabledTensions = tensionIds;
+        document.querySelectorAll('.tension-check').forEach(cb => { cb.checked = tensionIds.has(cb.value); });
     }
 
     // ── Practice Ideas: one-click presets ──────────────────────────────────
@@ -2372,7 +2381,7 @@
             droneSound = preset.sound;
             document.querySelectorAll('.sound-btn[data-sound]').forEach(b => b.classList.toggle('active', b.dataset.sound === preset.sound));
         }
-        droneForcedType = null; // presets work through the normal checkbox pool, never the single-locked-type path
+        droneForcedTypes=null; // presets work through the normal checkbox pool, never the single-locked-type path
         dronePeeked = false;
 
         const wantFreeze = !!preset.freeze;
@@ -2408,6 +2417,8 @@
 
         const rootParam  = params.get('root');
         const chordParam = params.get('chord');
+        const chordsParam = params.get('chords');   // comma-separated set of qualities to cycle through
+        const revealParam = params.get('reveal');   // peek | always
         const soundParam = params.get('sound');
         const durParam   = params.get('dur');
         const modeParam  = params.get('mode');   // fifths | fourths
@@ -2419,16 +2430,20 @@
 
         // Lock to one exact chord quality — and sync the checkboxes to match,
         // so what's on screen looks exactly like what you'd have entered
-        // yourself. The lock itself (droneForcedType) drops the instant the
+        // yourself. The lock itself (droneForcedTypes) drops the instant the
         // user touches any shape/seventh/tension control — see those handlers
         // below — so nothing stays stuck once you start editing.
-        if (chordParam) {
-            const match = droneTypes.find(t => t.n === chordParam);
-            if (match) {
-                droneForcedType = match;
-                applyPinnedChordChecks(match.n);
-                pinnedHarmony = true;
-            }
+        // One quality (?chord=) or several to cycle through (?chords=a,b,c). Names are
+        // matched against the 18 known qualities; anything unrecognized is ignored,
+        // and if nothing valid is left the drone just stays in its normal mode.
+        const requested = chordsParam ? chordsParam.split(',') : (chordParam ? [chordParam] : []);
+        const matches = requested
+            .map(n => droneTypes.find(t => t.n === n.trim()))
+            .filter((t, i, arr) => t && arr.indexOf(t) === i);
+        if (matches.length) {
+            droneForcedTypes = matches;
+            applyPinnedChordChecks(matches.map(t => t.n));
+            pinnedHarmony = true;
         }
 
         // Either cycle through a circle of keys, or lock to a single root
@@ -2474,10 +2489,14 @@
         }
 
         // Show the chord symbol once we've pinned specific harmony to practice over —
-        // this is no longer an ear-training guess, so hiding it would be pointless.
-        if (pinnedHarmony && droneRevealMode !== 'always') {
-            droneRevealMode = 'always';
-            document.querySelectorAll('.reveal-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'always'));
+        // that's no longer an ear-training guess. The exception is an exercise that
+        // IS the guess (?reveal=peek): the chord stays hidden until tapped.
+        const wantReveal = (revealParam === 'peek' || revealParam === 'always')
+            ? revealParam
+            : (pinnedHarmony ? 'always' : null);
+        if (wantReveal && droneRevealMode !== wantReveal) {
+            droneRevealMode = wantReveal;
+            document.querySelectorAll('.reveal-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === wantReveal));
             droneUpdateDisplay();
         }
     })();
