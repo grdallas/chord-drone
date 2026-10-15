@@ -597,17 +597,49 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        /* ── Mini view (?view=mini) ─────────────────────────────────────────
+           Opened from a session step: just the chord and the transport, with a
+           button to expand into the full drone in place. */
+        html.mini, html.mini body { height: auto; min-height: 0; }
+        html.mini #drone { padding: 0.75rem 0.75rem 0.5rem; min-height: 0; background: var(--paper); }
+        html.mini .tool-header,
+        html.mini #droneSettingsCard,
+        html.mini .practice-ideas-card { display: none; }
+        html.mini #droneDisplayCard { margin-bottom: 0; padding: 0.9rem 0.9rem 0.8rem; }
+        html.mini .chord-display { min-height: 0; padding: 0.9rem 0.75rem; margin-bottom: 0.6rem; }
+        html.mini .chord-symbol { font-size: 2.6rem; margin-bottom: 0.2rem; }
+        .mini-controls { display: none; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+        html.mini .mini-controls { display: flex; }
+        .mini-controls .drone-btn { width: auto; flex: 2 1 8rem; margin: 0; padding: 0.6rem 1rem; font-size: 1rem; }
+        .mini-controls .pause-btn { width: auto; flex: 1 1 5rem; margin: 0; padding: 0.55rem 0.75rem; }
+        .mini-expand {
+            flex: 1 1 100%; margin: 0.15rem 0 0; padding: 0.35rem 0; background: none; border: none;
+            font-family: var(--font-body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em;
+            text-transform: uppercase; color: var(--amber); cursor: pointer; text-align: center;
+        }
+        .mini-expand:hover { color: var(--ink); }
+        .mini-compact {
+            display: none; margin: 0 0 1rem auto; padding: 0.35rem 0.7rem; background: none;
+            border: 1px solid var(--border); font-family: var(--font-body); font-size: 0.7rem;
+            font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-muted); cursor: pointer;
+        }
+        html.mini-capable:not(.mini) .mini-compact { display: block; }
+        .mini-compact:hover { border-color: var(--ink); color: var(--ink); }
+        .mini-controls button:focus-visible, .mini-compact:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
     </style>
 </head>
 <body>
 
 <div id="drone">
 
+    <button type="button" class="mini-compact" id="droneCompactBtn">Compact view</button>
+
     <div class="tool-header">
         <h1>Chord <span class="accent">Drone</span></h1>
     </div>
 
-    <div class="card">
+    <div class="card" id="droneSettingsCard">
         <div class="control-group">
             <label class="section-label">Sound</label>
             <div class="sound-grid">
@@ -778,7 +810,7 @@
         </label>
     </div>
 
-    <div class="card">
+    <div class="card" id="droneDisplayCard">
         <div class="chord-display" id="droneChordDisplay">
             <div class="chord-symbol hidden" id="droneSymbol">—</div>
             <div class="chord-notes" id="droneNotes"></div>
@@ -788,6 +820,11 @@
         </div>
         <div class="drone-status" id="droneStatus">Click Start</div>
         <div class="drone-preview" id="dronePreview" hidden></div>
+        <div class="mini-controls" id="droneMiniControls">
+            <button type="button" class="drone-btn" id="droneMiniStart">Start</button>
+            <button type="button" class="pause-btn" id="droneMiniNext" disabled>Next →</button>
+            <button type="button" class="mini-expand" id="droneMiniExpand">Open full drone ↗</button>
+        </div>
     </div>
 
     <div class="card practice-ideas-card">
@@ -2520,6 +2557,46 @@
         btn.onclick = () => droneFilterIdeas(btn.dataset.level);
     });
 
+    // ── Mini view ──────────────────────────────────────────────────────────
+    // ?view=mini shows only the chord and the transport (for a session step).
+    // The mini buttons drive the real Start/Next buttons, so every mode the
+    // drone already has (metronome, chord sets, peek, resolve) works unchanged.
+    (function () {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('view') !== 'mini') return;
+        const root = document.documentElement;
+        root.classList.add('mini', 'mini-capable');
+
+        const realStart = document.getElementById('droneStartBtn');
+        const realNext = document.getElementById('droneNextBtn');
+        const miniStart = document.getElementById('droneMiniStart');
+        const miniNext = document.getElementById('droneMiniNext');
+
+        function sync() {
+            miniStart.textContent = realStart.textContent;
+            miniNext.disabled = realNext.disabled;
+        }
+        new MutationObserver(sync).observe(realStart, { childList: true, characterData: true, subtree: true });
+        new MutationObserver(sync).observe(realNext, { attributes: true, attributeFilter: ['disabled'] });
+        sync();
+
+        miniStart.addEventListener('click', () => realStart.click());
+        miniNext.addEventListener('click', () => realNext.click());
+
+        function postHeight() {
+            if (window.parent === window) return;
+            window.parent.postMessage({ type: 'practiceLabToolHeight', height: Math.ceil(document.getElementById('drone').getBoundingClientRect().height) }, '*');
+        }
+        function setMini(on) {
+            root.classList.toggle('mini', on);
+            window.scrollTo(0, 0);
+            requestAnimationFrame(postHeight);
+        }
+        document.getElementById('droneMiniExpand').addEventListener('click', () => setMini(false));
+        document.getElementById('droneCompactBtn').addEventListener('click', () => setMini(true));
+        if (window.ResizeObserver) new ResizeObserver(postHeight).observe(document.getElementById('drone'));
+    })();
+
     // ── Report content height to a parent page, if embedded ────────────────
     // When opened inside an iframe (the main app's "Practice Tools" full-page
     // view), tells the parent our real height so it can size the iframe to
@@ -2530,7 +2607,7 @@
     (function () {
         if (window.parent === window) return; // not embedded — nothing to do
         function reportHeight() {
-            window.parent.postMessage({ type: 'practiceLabToolHeight', height: document.documentElement.scrollHeight }, '*');
+            window.parent.postMessage({ type: 'practiceLabToolHeight', height: Math.ceil(document.getElementById('drone').getBoundingClientRect().height) }, '*');
         }
         window.addEventListener('load', reportHeight);
         window.addEventListener('resize', reportHeight);
